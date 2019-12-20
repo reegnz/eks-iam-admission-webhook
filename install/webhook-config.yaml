@@ -1,0 +1,16 @@
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: eks-iam-webhook
+webhooks:
+- name: eks-iam-admission-controller.default.svc.cluster.local
+  rules:
+  - operations: [CREATE, UPDATE]
+    apiGroups: [""]
+    apiVersions: [v1]
+    resources: [pods]
+  clientConfig:
+    service:
+      namespace: default
+      name: eks-iam-admission-controller
+    caBundle: $CA_BUNDLE

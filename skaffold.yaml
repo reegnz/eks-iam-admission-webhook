@@ -1,0 +1,10 @@
+apiVersion: skaffold/v1
+kind: Config
+build:
+  artifacts:
+  - image: reegnz/eks-iam-admission-controller
+    sync:
+      manual:
+      - src: src/**/*.py
+        dest: .
+        strip: src/

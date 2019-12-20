@@ -1,0 +1,53 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: eks-iam-admission-controller
+spec:
+  selector:
+    app: eks-iam-admission-controller
+  ports:
+  - port: 443
+    targetPort: https
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: eks-iam-admission-controller
+spec:
+  selector:
+    matchLabels:
+      app: eks-iam-admission-controller
+  template:
+    metadata:
+      labels:
+        app: eks-iam-admission-controller
+    spec:
+      containers:
+        - name: admission
+          image: reegnz/eks-iam-admission-controller
+          args: [
+            "python3", 
+            "-m", 
+            "flask", 
+            "run", 
+            "--cert=$(TLS_CERT_PATH)",
+            "--key=$(TLS_KEY_PATH)",
+            "--host=0.0.0.0"
+          ]
+          ports:
+            - name: https
+              containerPort: 5000
+          env:
+            - name: TLS_KEY_PATH
+              value: /etc/certs/tls.key
+            - name: TLS_CERT_PATH
+              value: /etc/certs/tls.crt
+          volumeMounts:
+            - name: tls
+              mountPath: "/etc/certs"
+              readOnly: true
+      volumes:
+        - name: tls
+          secret:
+            secretName: eks-iam-admission-controller-tls
